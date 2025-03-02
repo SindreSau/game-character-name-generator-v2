@@ -30,12 +30,12 @@ export async function generateCharacterNames(
     // Set defaults for optional fields
     const processedInput = {
       ...input,
-      race: input.race || 'unknown',
+      race: input.race || 'human',
       complexity: input.complexity || 5,
       gender: input.gender || 'neutral',
-      count: input.count || 5,
+      count: input.count || 10,
       length: input.length || 'medium',
-      forceFail: true,
+      forceFail: false,
     };
 
     // Primary generation method (Cloudflare)
@@ -55,8 +55,9 @@ export async function generateCharacterNames(
       console.log(
         'Primary name generation with Cloudflare failed, trying Gemini fallback...'
       );
-      const fallbackResult =
-        await generateCharacterNamesWithGemini(processedInput);
+      const fallbackResult = await generateCharacterNamesWithGemini(
+        processedInput
+      );
 
       return {
         ...fallbackResult,
@@ -71,8 +72,9 @@ export async function generateCharacterNames(
       // Try Gemini as fallback
       try {
         console.log('Trying Gemini as fallback due to Cloudflare error...');
-        const fallbackResult =
-          await generateCharacterNamesWithGemini(processedInput);
+        const fallbackResult = await generateCharacterNamesWithGemini(
+          processedInput
+        );
 
         return {
           ...fallbackResult,
@@ -97,7 +99,9 @@ export async function generateCharacterNames(
     console.error('Error in generateCharacterNames action:', error);
     return {
       success: false,
-      message: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      message: `Error: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
       names: [],
     };
   }
@@ -111,14 +115,18 @@ function validateInput(input: CharacterNameInput): {
   message: string;
 } {
   // Check required fields
-  if (
-    !input.genre ||
-    !Array.isArray(input.styles) ||
-    input.styles.length === 0
-  ) {
+  if (!input.genre) {
     return {
       isValid: false,
-      message: 'Invalid input: genre and non-empty styles array are required',
+      message: 'Invalid input: genre is required',
+    };
+  }
+
+  // Check that styles is an array with at least one element
+  if (!Array.isArray(input.styles)) {
+    return {
+      isValid: false,
+      message: 'Invalid input: styles array must contain at least one style',
     };
   }
 

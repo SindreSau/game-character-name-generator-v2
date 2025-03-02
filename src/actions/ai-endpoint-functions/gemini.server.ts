@@ -1,13 +1,9 @@
 'use server';
 
-import dotenv from 'dotenv';
 import {
   CharacterNameInput,
   GenerateCharacterNamesReturnType,
 } from '@/types/name-generator';
-
-// Initialize environment variables
-dotenv.config();
 
 /**
  * Call the Gemini API with the provided input, using structured output
@@ -76,24 +72,38 @@ export async function generateCharacterNamesWithGemini(
   try {
     const { genre, styles, race, complexity, gender, count, length } = input;
 
-    // Create system prompt with variables, similar to Cloudflare implementation
+    const nameExampleWithCount = JSON.stringify({
+      names: Array.from({ length: count! }, (_, i) => `Name${i + 1}`),
+    });
     const systemPrompt = `You are an expert at generating creative names for game characters with specific themes and styles.
 
 Instructions:
 - Generate EXACTLY ${count} unique character names that match the given attributes
-- For genre "${genre}" with styles [${styles.join(', ')}]
+- For genre "${genre}" with styles [${styles?.join(
+      ', '
+    )}] (If no styles are provided, use typical names for the genre)
 - Race: ${race}
 - Gender association: ${gender}
-- Name length: ${length}. Short names should be singular and easy to remember, medium names should be more detailed, and long names can be complex and multi-syllabic.
-- Complexity level: ${complexity}/10 (Higher means more unique/creative names)
+- Name length: ${length}. Short names must be singular, medium names can be one or two names, and long names can be complex and multi-syllabic.
+- Complexity level: ${complexity}/10 (Higher means more unique names, but not more syllables. 9-10 typically means adding in more special-characters or uncommon letters like: ë'-ōūáöðøæå)
 
 Race characteristics for "${race}":
 - Incorporate typical phonetic patterns for this race
 - Consider cultural connotations based on fantasy/gaming traditions
 
+For the styles [${styles?.join(
+      ', '
+    )}], incorporate thematic elements that suggest these qualities.
+
 For the list of names, make the first names slightly more simple and common and the last names slightly more complex and unique. This should barely be noticeable but will add a subtle layer of depth to the names.
 
-For the styles [${styles.join(', ')}], incorporate thematic elements that suggest these qualities.`;
+RESPONSE FORMAT REQUIREMENTS:
+1. You MUST respond with VALID JSON
+2. Your response must be ONLY a JSON object with a "names" array containing EXACTLY ${count} strings. For example:
+${nameExampleWithCount}
+3. Do not include any explanations or additional text
+4. Make sure the full list of names have good variety and are not too similar
+`;
 
     // Use a structured user prompt, like in the Cloudflare version
     const userPrompt = `${JSON.stringify(input)}`;
@@ -139,7 +149,9 @@ For the styles [${styles.join(', ')}], incorporate thematic elements that sugges
       console.error('Error parsing Gemini API response:', error);
       return {
         success: false,
-        message: `Parse error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        message: `Parse error: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
         names: [],
       };
     }
@@ -147,7 +159,9 @@ For the styles [${styles.join(', ')}], incorporate thematic elements that sugges
     console.error('Error generating character names with Gemini:', error);
     return {
       success: false,
-      message: `Gemini AI error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      message: `Gemini AI error: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
       names: [],
     };
   }
