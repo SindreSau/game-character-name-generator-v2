@@ -5,7 +5,6 @@ import {
   CharacterNameInput,
   GenerateCharacterNamesReturnType,
 } from '@/types/name-generator';
-import { getEnv } from '@/utils/env.server';
 
 // Initialize environment variables
 dotenv.config();
@@ -52,28 +51,71 @@ async function callCloudflareAI(
 export async function generateCharacterNamesWithCloudflare(
   input: CharacterNameInput,
   forceFail = false
-): Promise<GenerateCharacterNamesReturnType> {
-  // For testing fallback mechanism
-  if (forceFail) {
-    throw new Error('Forced failure for testing');
-  }
-
+): GenerateCharacterNamesReturnType {
   try {
-    const apiKey = getEnv('CLOUDFLARE_API_KEY');
-    const accountId = getEnv('CLOUDFLARE_ACCOUNT_ID');
-    // Rest of the function...
+    const { genre, styles, race, complexity, gender, count, length } = input;
 
-    // Mock implementation for example
-    return {
-      success: true,
-      message: 'Successfully generated names with Cloudflare',
-      names: ['Example name 1', 'Example name 2', 'Example name 3'],
-    };
+    // Check if the request should be forced to fail
+    if (forceFail) {
+      console.warn('Forced failure enabled, skipping Cloudflare AI call.');
+      return {
+        success: false,
+        message: 'Forced failure: AI request not sent.',
+        names: [],
+      };
+    }
+
+    const systemPrompt = `You are an expert at generating creative names for game characters with specific themes and styles.
+
+Instructions:
+- Generate EXACTLY ${count} unique character names that match the given attributes
+- For genre "${genre}" with styles [${styles.join(', ')}]
+- Race: ${race}
+- Gender association: ${gender}
+- Name length: ${length}. Short names should be singular and easy to remember, medium names should be more detailed, and long names can be complex and multi-syllabic.
+- Complexity level: ${complexity}/10 (Higher means more complex/unique/creative names)
+
+Race characteristics for "${race}":
+- Incorporate typical phonetic patterns for this race
+- Consider cultural connotations based on fantasy/gaming traditions
+
+For the styles [${styles.join(', ')}], incorporate thematic elements that suggest these qualities.
+
+For the list of names, make the first names slightly more simple and common and the last names slightly more complex and unique. This should barely be noticeable but will add a subtle layer of depth to the names.
+
+RESPONSE FORMAT REQUIREMENTS:
+1. You MUST respond with VALID JSON
+2. Your response must be ONLY a JSON object with a "names" array containing EXACTLY ${count} strings
+3. The closing bracket } MUST be included
+4. Do not include any explanations or additional text
+
+Example:
+{"names":["Name1","Name2","Name3","Name4","Name5"]}
+`;
+
+    // Use a structured user prompt
+    const userPrompt = `${JSON.stringify(input)}`;
+
+    // Call the AI API
+    const aiResult = await callCloudflareAI('@cf/meta/llama-3.2-3b-instruct', {
+      messages: [
+        {
+          role: 'system',
+          content: systemPrompt,
+        },
+        {
+          role: 'user',
+          content: userPrompt,
+        },
+      ],
+    });
+
+    return parseAIResponse(aiResult, count!);
   } catch (error) {
-    console.error('Error in Cloudflare name generation:', error);
+    console.error('Error generating character names with Cloudflare:', error);
     return {
       success: false,
-      message: `Cloudflare error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      message: `Cloudflare AI error: ${error instanceof Error ? error.message : 'Unknown error'}`,
       names: [],
     };
   }

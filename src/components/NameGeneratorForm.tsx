@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { generateCharacterNames } from '@/actions/get-names.server';
-import type { CharacterNameInput } from '@/types/name-generator';
+import { CharacterNameInput } from '@/types/name-generator';
 
 // Define genre options
 const genreOptions = [
@@ -94,11 +94,9 @@ export default function NameGeneratorForm() {
     setResults(null);
 
     try {
-      // Use the server action
       const result = await generateCharacterNames(formData);
       setResults(result);
     } catch (error) {
-      console.error('Error generating names:', error);
       setResults({
         success: false,
         message: error instanceof Error ? error.message : 'An error occurred',
