@@ -1,0 +1,38 @@
+{
+  "name": "game-name-gen-v2",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "vite --port=3001",
+    "build": "vite build",
+    "serve": "vite preview",
+    "start": "vite",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@tanstack/router-devtools": "^1.112.0",
+    "@tanstack/router-plugin": "^1.112.0",
+    "@types/node": "^22.13.8",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^4.3.2",
+    "daisyui": "^5.0.0",
+    "vite": "^6.0.3",
+    "vitest": "^3.0.7"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.0.9",
+    "@tanstack/react-router": "^1.112.0",
+    "dotenv": "^16.4.7",
+    "path": "^0.12.7",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.54.2",
+    "tailwindcss": "^4.0.9",
+    "use-local-storage": "^3.0.0",
+    "zod": "^3.24.2"
+  },
+  "packageManager": "pnpm@9.15.3+sha512.1f79bc245a66eb0b07c5d4d83131240774642caaa86ef7d0434ab47c0d16f66b04e21e0c086eb61e62c77efc4d7f7ec071afad3796af64892fae66509173893a"
+}
