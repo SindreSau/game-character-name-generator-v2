@@ -1,34 +1,21 @@
 'use server';
-
-import { generateCharacterNamesWithCloudflare } from './ai-endpoint-functions/cloudflare';
-
-// Type definitions
-type NameAttributes = {
-  length: number;
-};
-
-type CharacterNameInput = {
-  genre: string; // Game genre (RPG, Fantasy, Sci-Fi, etc.)
-  styles: string[]; // Style descriptors (fire, elemental, ninja, etc.)
-  race?: string; // Character race (human, elf, dwarf, orc, etc.)
-  complexity?: string | number; // How complex the name should be (1-10)
-  gender?: 'neutral' | 'masculine' | 'feminine'; // Gender association for the name
-  count?: number; // Number of names to generate
-};
-
-type GenerateCharacterNamesReturnType = Promise<{
-  success: boolean;
-  message: string;
-  names: string[];
-}>;
+import { generateCharacterNamesWithCloudflare } from './ai-endpoint-functions/cloudflare.server';
+import { generateCharacterNamesWithGemini } from './ai-endpoint-functions/gemini.server';
+import {
+  CharacterNameInput,
+  GenerateCharacterNamesReturnType,
+} from '@/types/name-generator';
 
 /**
  * Main action function to generate character names
  * This handles validation and orchestrates the name generation process
  */
 export async function generateCharacterNames(
-  input: CharacterNameInput
+  input: CharacterNameInput,
+  failCloudflare = false
 ): GenerateCharacterNamesReturnType {
+  // No need to repeat 'use server' directive here since it's already at the top
+
   try {
     // Validate input
     const validationResult = validateInput(input);
@@ -43,33 +30,69 @@ export async function generateCharacterNames(
     // Set defaults for optional fields
     const processedInput = {
       ...input,
-      race: input.race || 'human',
+      race: input.race || 'unknown',
       complexity: input.complexity || 5,
       gender: input.gender || 'neutral',
       count: input.count || 5,
+      length: input.length || 'medium',
+      forceFail: true,
     };
 
     // Primary generation method (Cloudflare)
     try {
-      const result = await generateCharacterNamesWithCloudflare(processedInput);
+      const result = await generateCharacterNamesWithCloudflare(
+        processedInput,
+        failCloudflare
+      );
       if (result.success) {
-        return result;
+        return {
+          ...result,
+          provider: 'cloudflare',
+        };
       }
-      // If primary method fails, we could add fallbacks here
-      console.log('Primary name generation failed, trying fallback...');
-      // return await generateWithFallbackMethod(processedInput);
-    } catch (error) {
-      console.error('Error in primary name generation:', error);
-      // Could add fallback here
-      // return await generateWithFallbackMethod(processedInput);
-    }
 
-    // If no method succeeded or no fallback is implemented yet
-    return {
-      success: false,
-      message: 'Failed to generate names with available methods',
-      names: [],
-    };
+      // If primary method fails, try the Gemini fallback
+      console.log(
+        'Primary name generation with Cloudflare failed, trying Gemini fallback...'
+      );
+      const fallbackResult =
+        await generateCharacterNamesWithGemini(processedInput);
+
+      return {
+        ...fallbackResult,
+        provider: 'gemini',
+        message: fallbackResult.success
+          ? `${fallbackResult.message} (Cloudflare failed, used Gemini as fallback)`
+          : fallbackResult.message,
+      };
+    } catch (error) {
+      console.error('Error in primary name generation with Cloudflare:', error);
+
+      // Try Gemini as fallback
+      try {
+        console.log('Trying Gemini as fallback due to Cloudflare error...');
+        const fallbackResult =
+          await generateCharacterNamesWithGemini(processedInput);
+
+        return {
+          ...fallbackResult,
+          provider: 'gemini',
+          message: fallbackResult.success
+            ? `${fallbackResult.message} (Cloudflare error, used Gemini as fallback)`
+            : fallbackResult.message,
+        };
+      } catch (fallbackError) {
+        console.error(
+          'Error in fallback name generation with Gemini:',
+          fallbackError
+        );
+        return {
+          success: false,
+          message: 'Both Cloudflare and Gemini name generation methods failed',
+          names: [],
+        };
+      }
+    }
   } catch (error) {
     console.error('Error in generateCharacterNames action:', error);
     return {
@@ -134,17 +157,3 @@ function validateInput(input: CharacterNameInput): {
 
   return { isValid: true, message: 'Input is valid' };
 }
-
-// Placeholder for future fallback implementation
-/*
-async function generateWithFallbackMethod(
-  input: CharacterNameInput
-): GenerateCharacterNamesReturnType {
-  // Implementation for fallback methods will go here
-  return {
-    success: false,
-    message: 'Fallback method not implemented yet',
-    names: [],
-  };
-}
-*/

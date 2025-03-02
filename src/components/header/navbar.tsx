@@ -5,7 +5,7 @@ const Navbar = () => {
     <>
       <nav className="flex justify-between bg-base-100 ">
         <ul className="flex gap-4">
-          <li>
+          {/* <li>
             <Link
               to="/"
               activeProps={{
@@ -15,7 +15,7 @@ const Navbar = () => {
             >
               Home
             </Link>
-          </li>
+          </li> */}
           {/* <li>
             <Link
               to="/about"
