@@ -84,20 +84,19 @@ For the styles [${styles?.join(
       ', '
     )}], incorporate thematic elements that suggest these qualities.
 
-For the list of names, make the first names slightly more simple and common and the last names slightly more complex and unique. This should barely be noticeable but will add a subtle layer of depth to the names.
+For the list of names, make the first names slightly more simple and common and the last names slightly more complex and unique. This should barely be noticeable but will add a subtle layer of depth to the names. Also, ensure that the names are unique and not too similar to each other.
 
 RESPONSE FORMAT REQUIREMENTS:
 1. You MUST respond with VALID JSON
 2. Your response must be ONLY a JSON object with a "names" array containing EXACTLY ${count} strings. For example:
 ${nameExampleWithCount}
 3. Do not include any explanations or additional text
-4. Make sure the full list of names have good variety and are not too similar
 `;
 
     // Use a structured user prompt
     const userPrompt = `${JSON.stringify(input)}`;
-    // console.log('System prompt:', systemPrompt);
-    // console.log('User prompt:', userPrompt);
+    console.log('System prompt:', systemPrompt);
+    console.log('User prompt:', userPrompt);
 
     // Call the AI API
     const aiResult = await callCloudflareAI('@cf/meta/llama-3.2-3b-instruct', {

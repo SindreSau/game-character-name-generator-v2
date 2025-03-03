@@ -30,9 +30,6 @@ type FormValues = z.infer<typeof formSchema>;
 // Predefined options for form selects
 const GENRE_OPTIONS = [
   'Fantasy',
-  'Sci-Fi',
-  'Historical',
-  'Modern',
   'Cyberpunk',
   'Steampunk',
   'Horror',
@@ -54,7 +51,7 @@ const GenerateNamesForm = () => {
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      genre: '',
+      genre: 'Fantasy',
       styles: '',
       complexity: 5,
       gender: 'neutral',
@@ -129,7 +126,6 @@ const GenerateNamesForm = () => {
                   {...register('genre')}
                   className="w-full px-3 py-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500"
                 >
-                  <option value="">Select a genre</option>
                   {GENRE_OPTIONS.map((genre) => (
                     <option key={genre} value={genre}>
                       {genre}
