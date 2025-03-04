@@ -4,6 +4,8 @@ import './globals.css';
 import { ThemeProvider } from '@/components/general/theme-provider';
 import Link from 'next/link';
 import { Toaster } from '@/components/ui/sonner';
+import { SiGithub } from '@icons-pack/react-simple-icons';
+import Header from '@/components/general/header';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -37,31 +39,20 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div className="flex flex-col min-h-screen">
-            <header className="flex justify-between items-center border-b border-zinc-800 p-4 relative z-10">
-              <Link href="/" className="font-bold text-2xl">
-                Game Name Generator
-              </Link>
+            <Header />
 
-              <nav>
-                <ul className="flex space-x-4">
-                  <li>
-                    <Link href="/" className="hover:underline">
-                      Home
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/about" className="hover:underline">
-                      About
-                    </Link>
-                  </li>
-                </ul>
-              </nav>
-            </header>
+            <main className="flex-grow container">{children}</main>
 
-            <main className="flex-grow relative z-10">{children}</main>
-
-            <footer className="text-center border-t border-zinc-800 p-4 relative z-10">
-              <p>© 2023 SindreSau. All Rights Reserved.</p>
+            <footer className="text-center border-t p-4 relative">
+              <div className="text-xs flex justify-center items-center gap-2 container">
+                <div>© 2025 @Github/SindreSau </div>
+                <Link
+                  href="https://github.com/SindreSau"
+                  className="hover:rotate-12 hover:text-primary duration-200 transition-all"
+                >
+                  <SiGithub size={16} />
+                </Link>
+              </div>
             </footer>
           </div>
           <Toaster />

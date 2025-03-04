@@ -75,7 +75,7 @@ export default function GenerateNamesForm() {
     defaultValues: {
       genre: 'Fantasy',
       styles: '',
-      complexity: 5,
+      complexity: 3,
       gender: 'neutral',
       length: 'medium',
     },
@@ -93,7 +93,6 @@ export default function GenerateNamesForm() {
       const input: CharacterNameInput = {
         ...data,
         styles: stylesArray,
-        race: 'human', // Default race
       };
 
       // Await the promise and cast its resolved value.
@@ -261,7 +260,7 @@ export default function GenerateNamesForm() {
                           <div className="relative">
                             <Slider
                               min={1}
-                              max={10}
+                              max={5}
                               step={1}
                               defaultValue={[field.value]}
                               onValueChange={(vals) => field.onChange(vals[0])}
