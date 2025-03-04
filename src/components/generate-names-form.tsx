@@ -128,11 +128,7 @@ export default function GenerateNamesForm() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl md:text-4xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-primary/80 to-teal-500/50 ">
-        Game Character Name Generator
-      </h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 min-h-[calc(100vh-18rem)]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[calc(100vh-30rem)]">
         {/* Form Section */}
         <div>
           <Card className="h-full">
@@ -352,6 +348,7 @@ export default function GenerateNamesForm() {
                               size="icon"
                               onClick={() => copyToClipboard(name)}
                               title="Copy to clipboard"
+                              className="cursor-pointer"
                             >
                               <Copy size={18} />
                             </Button>
