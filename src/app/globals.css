@@ -107,3 +107,8 @@
     @apply bg-gradient-to-bl from-lime-950/10 to-background min-h-screen text-foreground;
   }
 }
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 0.75rem;
+}

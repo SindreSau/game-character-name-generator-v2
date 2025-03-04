@@ -70,7 +70,7 @@ export async function generateCharacterNamesWithGemini(
   input: CharacterNameInput
 ): GenerateCharacterNamesReturnType {
   try {
-    const { genre, styles, race, complexity, gender, count, length } = input;
+    const { genre, styles, complexity, gender, count, length } = input;
 
     const nameExampleWithCount = JSON.stringify({
       names: Array.from({ length: count! }, (_, i) => `Name${i + 1}`),
@@ -79,30 +79,41 @@ export async function generateCharacterNamesWithGemini(
 
 Instructions:
 - Generate EXACTLY ${count} unique character names that match the given attributes
-- For genre "${genre}" with styles [${styles?.join(
-      ', '
-    )}] (If no styles are provided, use typical names for the genre)
-- Race: ${race}
+- For genre "${genre}" with styles [${
+      styles?.join(', ') || 'None specified'
+    }]. If no styles are specified, think of general themes and typical game characters for the genre.
 - Gender association: ${gender}
-- Name length: ${length}. Short names must be singular, medium names can be one or two names, and long names can be complex and multi-syllabic.
-- Complexity level: ${complexity}/10 (Higher means more unique names, but not more syllables. 9-10 typically means adding in more special-characters or uncommon letters like: ë'-ōūáöðøæå)
+- Name length: ${length}. Short names should be singular and easy to remember, medium names should be more detailed, and long names can be complex and multi-syllabic.
+- Complexity level: ${complexity}/5 - This works similarly to temperature for LLMs.
 
-Race characteristics for "${race}":
-- Incorporate typical phonetic patterns for this race
-- Consider cultural connotations based on fantasy/gaming traditions
+Complexity guide:
+- 1: Simple and easy to remember 
+- 2: Slightly more complex, but still common
+- 3: Balanced complexity with a mix of common and unique names
+- 4: More unique and complex names - add some special characters or unique spellings
+    example:
+      "Ætherion Voidheart",
+      "Dråkos Stormweaver",
+      "Nyxæla Shadowbane",
+      "Quetzål Flamecaster",
+      "Thørin Ravensoul"
+- 5: Highly unique and complex names - include special characters, unique spellings, or rare words
+    example:
+      "Ætherion Vøid'heart",
+      "Dråkos Þunder'weaver",
+      "Nyxæla Shadøw'bane",
+      "Quetzål Flame'caster",
+      "Thørin Råven'soul"
 
-For the styles [${styles?.join(
-      ', '
-    )}], incorporate thematic elements that suggest these qualities.
-
-For the list of names, make the first names slightly more simple and common and the last names slightly more complex and unique. This should barely be noticeable but will add a subtle layer of depth to the names.
+For the list of names, make the first names slightly more simple and common and the last names slightly more complex and unique. This should be noticeable and add a subtle layer of depth to the names.
 
 RESPONSE FORMAT REQUIREMENTS:
 1. You MUST respond with VALID JSON
-2. Your response must be ONLY a JSON object with a "names" array containing EXACTLY ${count} strings. For example:
-${nameExampleWithCount}
-3. Do not include any explanations or additional text
-4. Make sure the full list of names have good variety and are not too similar
+2. Your response must be ONLY a JSON object with a "names" array containing EXACTLY ${count} strings
+3. The closing bracket } MUST be included
+4. Do not include any explanations or additional text
+
+Example: ${nameExampleWithCount}
 `;
 
     // Use a structured user prompt, like in the Cloudflare version

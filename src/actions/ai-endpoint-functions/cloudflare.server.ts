@@ -11,15 +11,49 @@ type AIMessage = {
   content: string;
 };
 
+type CloudflareAIResult = {
+  result: {
+    response: string;
+    [key: string]: unknown;
+  };
+  success: boolean;
+  errors: string[];
+  messages: string[];
+};
+
 /**
  * Call the Cloudflare AI API with the specified model and input
  */
 async function callCloudflareAI(
   model: string,
-  input: { messages: AIMessage[] }
-) {
+  input: { messages: AIMessage[] },
+  complexity: number
+): Promise<CloudflareAIResult> {
   const accountId =
     process.env.CLOUDFLARE_ACCOUNT_ID || 'e7692f5aa2217d2df0ebcfeb66d4fb08';
+
+  const temperatureFromComplexity = (complexity: number): number => {
+    switch (complexity) {
+      case 1:
+        return 0.1;
+      case 2:
+        return 0.3;
+      case 3:
+        return 0.5;
+      case 4:
+        return 0.7;
+      case 5:
+        return 1;
+      default:
+        return 0.5;
+    }
+  };
+
+  console.log(
+    'Calling Cloudflare AI with temperature:',
+    temperatureFromComplexity(complexity)
+  );
+  console.log('Input:', input);
 
   const response = await fetch(
     `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}`,
@@ -29,7 +63,10 @@ async function callCloudflareAI(
         'Content-Type': 'application/json',
       },
       method: 'POST',
-      body: JSON.stringify({ ...input }),
+      body: JSON.stringify({
+        ...input,
+        temperature: temperatureFromComplexity,
+      }),
     }
   );
 
@@ -49,7 +86,7 @@ export async function generateCharacterNamesWithCloudflare(
   forceFail = false
 ): GenerateCharacterNamesReturnType {
   try {
-    const { genre, styles, race, complexity, gender, count, length } = input;
+    const { genre, styles, complexity, gender, count, length } = input;
 
     // Check if the request should be forced to fail
     if (forceFail) {
@@ -61,52 +98,62 @@ export async function generateCharacterNamesWithCloudflare(
       };
     }
 
+    const nameExampleWithCount = JSON.stringify({
+      names: Array.from({ length: count! }, (_, i) => `Name${i + 1}`),
+    });
+
     const systemPrompt = `You are an expert at generating creative names for game characters with specific themes and styles.
 
-Instructions:
-- Generate EXACTLY ${count} unique character names that match the given attributes
-- For genre "${genre}" with styles [${styles.join(', ')}]
-- Race: ${race}
-- Gender association: ${gender}
-- Name length: ${length}. Short names should be singular and easy to remember, medium names should be more detailed, and long names can be complex and multi-syllabic.
-- Complexity level: ${complexity}/10 (Higher means more complex/unique/creative names)
-
-Race characteristics for "${race}":
-- Incorporate typical phonetic patterns for this race
-- Consider cultural connotations based on fantasy/gaming traditions
-
-For the styles [${styles.join(
-      ', '
-    )}], incorporate thematic elements that suggest these qualities.
-
-For the list of names, make the first names slightly more simple and common and the last names slightly more complex and unique. This should barely be noticeable but will add a subtle layer of depth to the names.
-
-RESPONSE FORMAT REQUIREMENTS:
+    RESPONSE FORMAT REQUIREMENTS:
 1. You MUST respond with VALID JSON
 2. Your response must be ONLY a JSON object with a "names" array containing EXACTLY ${count} strings
 3. The closing bracket } MUST be included
 4. Do not include any explanations or additional text
 
-Example:
-{"names":["Name1","Name2","Name3","Name4","Name5"]}
+Example: ${nameExampleWithCount}
+    
+Instructions:
+- Generate EXACTLY ${count} unique character names that match the given attributes
+- For genre "${genre}" with styles [${
+      styles?.join(', ') || 'None specified'
+    }]. If no styles are specified, think of general themes and typical game characters for the genre.
+- Gender association: ${gender}
+- Name length: ${length}. Short names should be singular and easy to remember, medium names should be more detailed, and long names can be complex and multi-syllabic.
+- Complexity level: ${complexity}/5 - Describes the complexity of the names, similar to temperature for LLMs.
+
+Complexity guide:
+1/5 = Simple and easy to remember
+2/5 = Slightly more complex, but still common
+3/5 = Balanced complexity with a mix of common and unique names
+4/5 = More unique and complex names - add some special characters or unique spellings
+5/5 = Highly unique and complex names - MUST INCLUDE special characters like ', ", Æ, Þ etc.
+
+BEFORE YOU RESPOND, ENSURE THAT YOU HAVE FOLLOWED ALL THE REQUIREMENTS PERFECTLY!
 `;
 
-    // Use a structured user prompt
+    // Remove forceFail: true and count: x from the input
+    delete input.count;
     const userPrompt = `${JSON.stringify(input)}`;
+    // console.log('Generating response with Cloudflare AI:', systemPrompt);
+    // console.log('userPrompt: ', userPrompt);
 
     // Call the AI API
-    const aiResult = await callCloudflareAI('@cf/meta/llama-3.2-3b-instruct', {
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        {
-          role: 'user',
-          content: userPrompt,
-        },
-      ],
-    });
+    const aiResult = await callCloudflareAI(
+      '@cf/meta/llama-3.2-3b-instruct',
+      {
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt,
+          },
+          {
+            role: 'user',
+            content: userPrompt,
+          },
+        ],
+      },
+      complexity || 3
+    );
 
     return parseAIResponse(aiResult, count!);
   } catch (error) {
@@ -125,7 +172,7 @@ Example:
  * Parse and extract names from the AI response
  */
 async function parseAIResponse(
-  aiResult: any,
+  aiResult: CloudflareAIResult,
   count: number
 ): GenerateCharacterNamesReturnType {
   try {

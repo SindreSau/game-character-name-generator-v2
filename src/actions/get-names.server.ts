@@ -30,12 +30,10 @@ export async function generateCharacterNames(
     // Set defaults for optional fields
     const processedInput = {
       ...input,
-      race: input.race || 'human',
-      complexity: input.complexity || 5,
+      complexity: input.complexity || 3,
       gender: input.gender || 'neutral',
       count: input.count || 10,
       length: input.length || 'medium',
-      forceFail: false,
     };
 
     // Primary generation method (Cloudflare)
@@ -133,7 +131,7 @@ function validateInput(input: CharacterNameInput): {
   // Validate complexity if provided
   if (input.complexity !== undefined) {
     const complexityNum = Number(input.complexity);
-    if (isNaN(complexityNum) || complexityNum < 1 || complexityNum > 10) {
+    if (isNaN(complexityNum) || complexityNum < 1 || complexityNum > 5) {
       return {
         isValid: false,
         message: 'Complexity must be between 1 and 10',
