@@ -117,10 +117,10 @@ export default function Header() {
 
   return (
     <header className="border-b border-zinc-800 p-3 md:p-4 relative">
-      <div className="flex justify-between items-center container lg:pr-16 xl:pr-0">
+      <div className="flex justify-between items-center container lg:pr-16  2xl:pr-0">
         <Link href="/" className="flex items-center gap-2 text-primary">
           <span className="bg-gradient-to-r from-primary to-teal-500 text-transparent bg-clip-text font-semibold">
-            GameNameGen
+            NameGen
           </span>
           <Wand2 size={16} />
         </Link>
