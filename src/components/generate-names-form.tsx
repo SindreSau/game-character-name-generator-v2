@@ -1,12 +1,37 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { Copy, GripHorizontal, WandSparkles } from 'lucide-react';
 import { generateCharacterNames } from '@/actions/get-names.server';
 import { CharacterNameInput } from '@/types/name-generator';
-import { Copy } from 'lucide-react';
+import { toast } from 'sonner';
+
+// shadcn/ui components
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Slider } from '@/components/ui/slider';
+import { Button } from '@/components/ui/button';
+import Spinner from './general/spinner';
 
 // Define a type for the resolved value
 type ResolvedGenerateCharacterNamesReturnType = {
@@ -20,7 +45,7 @@ type ResolvedGenerateCharacterNamesReturnType = {
 const formSchema = z.object({
   genre: z.string().min(1, 'Genre is required'),
   styles: z.string(),
-  complexity: z.coerce.number().min(1).max(10).default(5),
+  complexity: z.number().min(1).max(10).default(5),
   gender: z.enum(['neutral', 'masculine', 'feminine']).default('neutral'),
   length: z.enum(['short', 'medium', 'long']).default('medium'),
 });
@@ -30,25 +55,22 @@ type FormValues = z.infer<typeof formSchema>;
 // Predefined options for form selects
 const GENRE_OPTIONS = [
   'Fantasy',
-  'Cyberpunk',
-  'Steampunk',
+  'Sci-Fi',
   'Horror',
-  'Western',
+  'Action',
+  'RPG',
+  'FPS',
+  'MMO',
+  'Fighting',
 ];
 
-const GenerateNamesForm = () => {
+export default function GenerateNamesForm() {
   // Use the resolved type for state
   const [result, setResult] =
     useState<ResolvedGenerateCharacterNamesReturnType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm<FormValues>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       genre: 'Fantasy',
@@ -87,214 +109,233 @@ const GenerateNamesForm = () => {
         names: [],
       };
       setResult(errorResult);
+
+      toast.error('Failed to generate names', {
+        description: 'There was an error processing your request.',
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const copyToClipboard = (text: string, index: number) => {
+  const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
-      setCopiedIndex(index);
-      setTimeout(() => setCopiedIndex(null), 1500);
+      toast.success('Copied to clipboard', {
+        description: `"${text}" has been copied.`,
+        duration: 1500,
+      });
     });
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 py-8">
-      <div className="container mx-auto p-4">
-        <h1 className="text-4xl font-bold mb-8 text-center text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-blue-500 to-emerald-400">
-          Character Name Generator
-        </h1>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl md:text-4xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-primary/80 to-teal-500/50 ">
+        Game Character Name Generator
+      </h1>
 
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Form Section */}
-          <div className="w-full md:w-1/2">
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="space-y-6 bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700"
-            >
-              {/* Genre Field */}
-              <div>
-                <label
-                  htmlFor="genre"
-                  className="block text-sm font-medium mb-1 text-gray-300"
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 min-h-[calc(100vh-18rem)]">
+        {/* Form Section */}
+        <div>
+          <Card className="h-full">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-foreground">Create Names</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
                 >
-                  Genre <span className="text-emerald-400">*</span>
-                </label>
-                <select
-                  id="genre"
-                  {...register('genre')}
-                  className="w-full px-3 py-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500"
-                >
-                  {GENRE_OPTIONS.map((genre) => (
-                    <option key={genre} value={genre}>
-                      {genre}
-                    </option>
-                  ))}
-                </select>
-                {errors.genre && (
-                  <p className="text-red-400 text-sm mt-1">
-                    {errors.genre.message}
-                  </p>
-                )}
-              </div>
+                  {/* Genre Field */}
+                  <FormField
+                    control={form.control}
+                    name="genre"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>Genre</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select a genre" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {GENRE_OPTIONS.map((genre) => (
+                              <SelectItem key={genre} value={genre}>
+                                {genre}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              {/* Styles Field */}
-              <div>
-                <label
-                  htmlFor="styles"
-                  className="block text-sm font-medium mb-1 text-gray-300"
-                >
-                  Styles <span className="text-emerald-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="styles"
-                  {...register('styles')}
-                  placeholder="Elegant, Mysterious, Epic (comma separated)"
-                  className="w-full px-3 py-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:border-blue-500 focus:ring-blue-500"
-                />
-                {errors.styles && (
-                  <p className="text-red-400 text-sm mt-1">
-                    {errors.styles.message}
-                  </p>
-                )}
-              </div>
+                  {/* Styles Field */}
+                  <FormField
+                    control={form.control}
+                    name="styles"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Styles</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Elegant, Mysterious, Epic (comma separated)"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Enter styles separated by commas
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              {/* Gender Toggle */}
-              <div>
-                <label className="block text-sm font-medium mb-2 text-gray-300">
-                  Gender Leaning
-                </label>
-                <div className="flex space-x-2 bg-gray-700 p-1 rounded-lg">
-                  {['neutral', 'masculine', 'feminine'].map((option) => (
-                    <label
-                      key={option}
-                      className="flex-1 text-center cursor-pointer"
-                    >
-                      <input
-                        type="radio"
-                        {...register('gender')}
-                        value={option}
-                        className="sr-only"
-                      />
-                      <div
-                        className={`px-4 py-2 text-sm rounded-md cursor-pointer transition-all ${
-                          watch('gender') === option
-                            ? 'bg-blue-600 text-white shadow-lg'
-                            : 'text-gray-300 hover:bg-gray-600'
-                        }`}
-                      >
-                        {option.charAt(0).toUpperCase() + option.slice(1)}
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
+                  {/* Gender Toggle */}
+                  <FormField
+                    control={form.control}
+                    name="gender"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Gender Leaning</FormLabel>
+                        <FormControl>
+                          <Tabs
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="w-full"
+                          >
+                            <TabsList className="grid grid-cols-3 w-full">
+                              <TabsTrigger value="neutral">Neutral</TabsTrigger>
+                              <TabsTrigger value="masculine">
+                                Masculine
+                              </TabsTrigger>
+                              <TabsTrigger value="feminine">
+                                Feminine
+                              </TabsTrigger>
+                            </TabsList>
+                          </Tabs>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              {/* Name Length Toggle */}
-              <div>
-                <label className="block text-sm font-medium mb-2 text-gray-300">
-                  Name Length
-                </label>
-                <div className="flex space-x-2 bg-gray-700 p-1 rounded-lg">
-                  {['short', 'medium', 'long'].map((option) => (
-                    <label
-                      key={option}
-                      className="flex-1 text-center cursor-pointer"
-                    >
-                      <input
-                        type="radio"
-                        {...register('length')}
-                        value={option}
-                        className="sr-only"
-                      />
-                      <div
-                        className={`px-4 py-2 text-sm rounded-md cursor-pointer transition-all ${
-                          watch('length') === option
-                            ? 'bg-blue-600 text-white shadow-lg'
-                            : 'text-gray-300 hover:bg-gray-600'
-                        }`}
-                      >
-                        {option.charAt(0).toUpperCase() + option.slice(1)}
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
+                  {/* Name Length Toggle */}
+                  <FormField
+                    control={form.control}
+                    name="length"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name Length</FormLabel>
+                        <FormControl>
+                          <Tabs
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="w-full"
+                          >
+                            <TabsList className="grid grid-cols-3 w-full">
+                              <TabsTrigger value="short">Short</TabsTrigger>
+                              <TabsTrigger value="medium">Medium</TabsTrigger>
+                              <TabsTrigger value="long">Long</TabsTrigger>
+                            </TabsList>
+                          </Tabs>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              {/* Complexity Slider */}
-              <div className="pt-4">
-                <label
-                  htmlFor="complexity"
-                  className="block text-sm font-medium mb-1 text-gray-300"
-                >
-                  Complexity:{' '}
-                  <span className="text-emerald-400">
-                    {watch('complexity')}
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  id="complexity"
-                  min="1"
-                  max="10"
-                  step="1"
-                  {...register('complexity')}
-                  className="w-full accent-emerald-400"
-                />
-                <div className="flex justify-between text-xs text-gray-400">
-                  <span>Simple</span>
-                  <span>Complex</span>
-                </div>
-              </div>
+                  {/* Complexity Slider */}
+                  <FormField
+                    control={form.control}
+                    name="complexity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Complexity: {field.value}</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Slider
+                              min={1}
+                              max={10}
+                              step={1}
+                              defaultValue={[field.value]}
+                              onValueChange={(vals) => field.onChange(vals[0])}
+                              className="w-full"
+                            />
+                            <div className="absolute -top-1 left-0 right-0 pointer-events-none flex justify-between opacity-0">
+                              <GripHorizontal
+                                size={16}
+                                className="text-primary opacity-70"
+                              />
+                            </div>
+                          </div>
+                        </FormControl>
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>Simple</span>
+                          <span>Complex</span>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full mt-6 bg-gradient-to-r from-blue-600 to-emerald-500 hover:from-blue-700 hover:to-emerald-600 text-white font-medium py-3 px-4 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-              >
-                {isLoading ? (
-                  <span className="flex items-center justify-center">
-                    <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Generating...
-                  </span>
-                ) : (
-                  'Generate Names'
-                )}
-              </button>
-            </form>
-          </div>
+                  <Button
+                    type="submit"
+                    className="w-full cursor-pointer"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <span className="flex items-center justify-center">
+                        <svg
+                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Generating...
+                      </span>
+                    ) : (
+                      <>
+                        <span>Generate Names</span>
+                        <WandSparkles />
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </div>
 
-          {/* Results Section */}
-          <div className="w-full md:w-1/2 mt-6 md:mt-0">
-            <div className="bg-gray-800 p-6 rounded-lg shadow-lg h-full border border-gray-700">
-              <h2 className="text-xl font-semibold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
-                Generated Names
-              </h2>
-
+        {/* Results Section */}
+        <div>
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle className="text-foreground">Generated Names</CardTitle>
+            </CardHeader>
+            <CardContent>
               {isLoading ? (
-                <div className="flex justify-center items-center h-64">
-                  <div className="animate-spin h-16 w-16 border-t-2 border-b-2 border-emerald-400 rounded-full"></div>
+                <div className="flex justify-center items-center size-full">
+                  <Spinner />
                 </div>
               ) : result ? (
                 <div>
@@ -304,54 +345,43 @@ const GenerateNamesForm = () => {
                         {result.names.map((name: string, index: number) => (
                           <div
                             key={index}
-                            className="flex justify-between items-center bg-gray-700 p-3 rounded-lg border border-gray-600 hover:border-blue-500 transition-all"
+                            className="flex justify-between items-center bg-secondary p-3 rounded-lg border border-border hover:border-primary transition-all"
                           >
-                            <span className="text-lg text-gray-100">
-                              {name}
-                            </span>
-                            <button
-                              onClick={() => copyToClipboard(name, index)}
-                              className="p-2 text-gray-300 hover:text-emerald-400 transition-colors focus:outline-none"
+                            <span className="text-lg">{name}</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => copyToClipboard(name)}
                               title="Copy to clipboard"
                             >
-                              {copiedIndex === index ? (
-                                <span className="text-emerald-400 text-sm">
-                                  Copied!
-                                </span>
-                              ) : (
-                                <Copy size={18} />
-                              )}
-                            </button>
+                              <Copy size={18} />
+                            </Button>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-400">No names were generated.</p>
+                      <p className="text-muted-foreground">
+                        No names were generated.
+                      </p>
                     )
                   ) : (
-                    <div className="text-red-400 p-4 border border-red-800 bg-red-900/30 rounded-lg">
+                    <div className="text-destructive p-4 border border-destructive bg-destructive/10 rounded-lg">
                       <p className="font-medium">Error</p>
                       <p>{result.message}</p>
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-gray-700 rounded-lg">
-                  <p className="text-gray-500 text-center mb-2">
-                    Fill out the form and generate some character names
-                  </p>
-                  <div className="text-5xl text-blue-500 mb-4">🎮</div>
-                  <p className="text-gray-600 text-sm text-center">
-                    Perfect for your next game, story, or RPG character
+                <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-muted rounded-lg">
+                  <p className="text-muted-foreground">
+                    No names generated yet
                   </p>
                 </div>
               )}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
   );
-};
-
-export default GenerateNamesForm;
+}
