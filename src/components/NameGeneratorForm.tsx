@@ -37,7 +37,6 @@ export default function NameGeneratorForm() {
   const [formData, setFormData] = useState<CharacterNameInput>({
     genre: 'Fantasy',
     styles: ['Elegant'],
-    race: '',
     complexity: 5,
     gender: 'neutral',
     count: 5,
@@ -165,7 +164,6 @@ export default function NameGeneratorForm() {
             id="race"
             name="race"
             placeholder="e.g., Elf, Human, Alien"
-            value={formData.race || ''}
             onChange={handleChange}
             className="w-full p-2 border rounded-md"
           />

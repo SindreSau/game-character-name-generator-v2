@@ -7,8 +7,7 @@ export type CharacterNameInput = {
   genre: string; // Game genre (RPG, Fantasy, Sci-Fi, etc.)
   styles?: string[]; // Style descriptors (fire, elemental, ninja, etc.)
   gender?: 'neutral' | 'masculine' | 'feminine'; // Gender association for the name
-  race?: string; // Character race (human, elf, dwarf, orc, etc.)
-  complexity?: string | number; // How complex the name should be (1-10)
+  complexity?: number; // How complex the name should be (1-10)
   length?: 'short' | 'medium' | 'long'; // Length of the name
 };
 
