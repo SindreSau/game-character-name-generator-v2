@@ -1,6 +1,6 @@
 'use client';
 
-import { Wand, Wand2Icon } from 'lucide-react';
+import { Wand } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
