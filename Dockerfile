@@ -20,6 +20,8 @@ RUN npm install -g pnpm
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
 
+RUN mkdir -p public
+
 RUN pnpm run build
 
 # Run
