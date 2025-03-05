@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import GenerateNamesForm from '@/components/generate-names-form';
+import GenerateNamesForm from '@/components/form-generator/generate-names-form';
 import {
   Accordion,
   AccordionContent,
