@@ -15,6 +15,8 @@ async function callGeminiAI(prompt: string, count?: number) {
     throw new Error('GEMINI_API_TOKEN not found in environment variables');
   }
 
+  console.log('Calling Gemini API with prompt:', prompt);
+
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${API_KEY}`,
     {
@@ -77,43 +79,45 @@ export async function generateCharacterNamesWithGemini(
     });
     const systemPrompt = `You are an expert at generating creative names for game characters with specific themes and styles.
 
-Instructions:
-- Generate EXACTLY ${count} unique character names that match the given attributes
-- For genre "${genre}" with styles [${
-      styles?.join(', ') || 'None specified'
-    }]. If no styles are specified, think of general themes and typical game characters for the genre.
-- Gender association: ${gender}
-- Name length: ${length}. Short names should be singular and easy to remember, medium names should be more detailed, and long names can be complex and multi-syllabic.
-- Complexity level: ${complexity}/5 - This works similarly to temperature for LLMs.
+### RESPONSE FORMAT REQUIREMENTS:
+- **You MUST respond with VALID JSON**
+- **Your response MUST be ONLY a JSON object** with a "names" array containing EXACTLY "${count}" strings.
+- **Do NOT include explanations or extra text**—only the JSON response.
+- **Ensure the JSON object is fully closed** (}).
 
-Complexity guide:
-- 1: Simple and easy to remember 
-- 2: Slightly more complex, but still common
-- 3: Balanced complexity with a mix of common and unique names
-- 4: More unique and complex names - add some special characters or unique spellings
-    example:
-      "Ætherion Voidheart",
-      "Dråkos Stormweaver",
-      "Nyxæla Shadowbane",
-      "Quetzål Flamecaster",
-      "Thørin Ravensoul"
-- 5: Highly unique and complex names - include special characters, unique spellings, or rare words
-    example:
-      "Ætherion Vøid'heart",
-      "Dråkos Þunder'weaver",
-      "Nyxæla Shadøw'bane",
-      "Quetzål Flame'caster",
-      "Thørin Råven'soul"
+---
 
-For the list of names, make the first names slightly more simple and common and the last names slightly more complex and unique. This should be noticeable and add a subtle layer of depth to the names.
+### **INSTRUCTIONS:**
+Generate **EXACTLY** "${count}" unique character names based on the given attributes.
 
-RESPONSE FORMAT REQUIREMENTS:
-1. You MUST respond with VALID JSON
-2. Your response must be ONLY a JSON object with a "names" array containing EXACTLY ${count} strings
-3. The closing bracket } MUST be included
-4. Do not include any explanations or additional text
+- **Genre**: "${genre}"
+- **Styles**: [${styles?.join(', ') || 'None specified'}]  
+  - _(If no styles are specified, use general themes and typical game characters for the genre.)_
+- **Gender Association**: ${gender}
+- **Name Length**: ${length}
+  - **Short Names**: Single, easy-to-remember names.
+  - **Medium Names**: More detailed, with 1-2 name components.
+  - **Long Names**: Complex, with 2-3 name components (**never more than three**).
 
-Example: ${nameExampleWithCount}
+### **Complexity Level**: ${complexity}/5  
+_(Describes name complexity, similar to temperature for LLMs.)_
+
+#### **Complexity Guide:**
+- **1/5** = Simple and easy to remember  
+- **2/5** = Slightly more complex but still common  
+- **3/5** = Balanced complexity (mix of common and unique names)  
+- **4/5** = More unique and complex (may include special characters or unique spellings)  
+- **5/5** = Highly unique and complex (may include invented names or rare words and special characters or unique spellings) - Special characters must be properly escaped. Each name should still be a single JSON string.
+
+---
+
+### **FINAL CHECK BEFORE RESPONDING**  
+✅ Ensure the response follows ALL requirements, especially:  
+- **EXACT number of names ("${count}") in the "names" array**  
+- **No explanations, extra text, or markdown! Only pure, valid JSON**  
+
+#### Example Output:
+${nameExampleWithCount}
 `;
 
     // Use a structured user prompt, like in the Cloudflare version

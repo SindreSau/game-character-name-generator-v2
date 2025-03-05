@@ -39,20 +39,17 @@ async function callCloudflareAI(
       case 2:
         return 0.3;
       case 3:
-        return 0.5;
+        return 0.6;
       case 4:
-        return 0.7;
+        return 0.75;
       case 5:
-        return 1;
+        return 0.85;
       default:
         return 0.5;
     }
   };
 
-  console.log(
-    'Calling Cloudflare AI with temperature:',
-    temperatureFromComplexity(complexity)
-  );
+  console.log('Calling Cloudflare AI with:');
   console.log('Input:', input);
 
   const response = await fetch(
@@ -65,7 +62,7 @@ async function callCloudflareAI(
       method: 'POST',
       body: JSON.stringify({
         ...input,
-        temperature: temperatureFromComplexity,
+        temperature: temperatureFromComplexity(complexity),
       }),
     }
   );
@@ -104,31 +101,45 @@ export async function generateCharacterNamesWithCloudflare(
 
     const systemPrompt = `You are an expert at generating creative names for game characters with specific themes and styles.
 
-    RESPONSE FORMAT REQUIREMENTS:
-1. You MUST respond with VALID JSON
-2. Your response must be ONLY a JSON object with a "names" array containing EXACTLY ${count} strings
-3. The closing bracket } MUST be included
-4. Do not include any explanations or additional text
+### RESPONSE FORMAT REQUIREMENTS:
+- **You MUST respond with VALID JSON**
+- **Your response MUST be ONLY a JSON object** with a "names" array containing EXACTLY "${count}" strings.
+- **Do NOT include explanations or extra text**—only the JSON response.
+- **Ensure the JSON object is fully closed** (}).
 
-Example: ${nameExampleWithCount}
-    
-Instructions:
-- Generate EXACTLY ${count} unique character names that match the given attributes
-- For genre "${genre}" with styles [${
-      styles?.join(', ') || 'None specified'
-    }]. If no styles are specified, think of general themes and typical game characters for the genre.
-- Gender association: ${gender}
-- Name length: ${length}. Short names should be singular and easy to remember, medium names should be more detailed, and long names can be complex and multi-syllabic.
-- Complexity level: ${complexity}/5 - Describes the complexity of the names, similar to temperature for LLMs.
+---
 
-Complexity guide:
-1/5 = Simple and easy to remember
-2/5 = Slightly more complex, but still common
-3/5 = Balanced complexity with a mix of common and unique names
-4/5 = More unique and complex names - add some special characters or unique spellings
-5/5 = Highly unique and complex names - MUST INCLUDE special characters like ', ", Æ, Þ etc.
+### **INSTRUCTIONS:**
+Generate **EXACTLY** "${count}" unique character names based on the given attributes.
 
-BEFORE YOU RESPOND, ENSURE THAT YOU HAVE FOLLOWED ALL THE REQUIREMENTS PERFECTLY!
+- **Genre**: "${genre}"
+- **Styles**: [${styles?.join(', ') || 'None specified'}]  
+  - _(If no styles are specified, use general themes and typical game characters for the genre.)_
+- **Gender Association**: ${gender}
+- **Name Length**: ${length}
+  - **Short Names**: Single, easy-to-remember names.
+  - **Medium Names**: More detailed, with 1-2 name components.
+  - **Long Names**: Complex, with 2-3 name components (**never more than three**).
+
+### **Complexity Level**: ${complexity}/5  
+_(Describes name complexity, similar to temperature for LLMs.)_
+
+#### **Complexity Guide:**
+- **1/5** = Simple and easy to remember  
+- **2/5** = Slightly more complex but still common  
+- **3/5** = Balanced complexity (mix of common and unique names)  
+- **4/5** = More unique and complex (may include special characters or unique spellings)  
+- **5/5** = Highly unique and complex (may include invented names or rare words and special characters or unique spellings) - Special characters must be properly escaped. Each name should still be a single JSON string.
+
+---
+
+### **FINAL CHECK BEFORE RESPONDING**  
+✅ Ensure the response follows ALL requirements, especially:  
+- **EXACT number of names ("${count}") in the "names" array**  
+- **No explanations, extra text, or markdown! Only pure, valid JSON**  
+
+#### Example Output:
+${nameExampleWithCount}
 `;
 
     // Remove forceFail: true and count: x from the input
@@ -154,6 +165,8 @@ BEFORE YOU RESPOND, ENSURE THAT YOU HAVE FOLLOWED ALL THE REQUIREMENTS PERFECTLY
       },
       complexity || 3
     );
+
+    console.log('AI response:', aiResult);
 
     return parseAIResponse(aiResult, count!);
   } catch (error) {
