@@ -129,7 +129,7 @@ export default function GenerateNamesForm() {
 
   return (
     <div className="container mx-auto p-4">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[calc(100vh-30rem)]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 ">
         {/* Form Section */}
         <FadeInSection delay={100}>
           <Card className="h-full backdrop-blur-md bg-background/30">
@@ -353,7 +353,7 @@ export default function GenerateNamesForm() {
                             key={index}
                             observeScroll={false}
                           >
-                            <div className="flex justify-between items-center bg-secondary p-3 rounded-lg border border-border hover:border-primary transition-all">
+                            <div className="flex justify-between items-center bg-secondary px-4 py-2 rounded-lg border border-border hover:border-primary transition-all">
                               <span className="text-lg">{name}</span>
                               <Button
                                 variant="ghost"

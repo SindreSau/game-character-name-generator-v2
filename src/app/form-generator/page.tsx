@@ -84,7 +84,7 @@ export default function FormGenerator() {
       </FadeInSection>
 
       <FadeInSection delay={200}>
-        <section className="container mx-auto max-w-4xl mb-16">
+        <section className="container mx-auto max-w-4xl mb-16 text-muted-foreground">
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="about">
               <AccordionTrigger className="text-lg font-medium">
