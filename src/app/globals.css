@@ -104,7 +104,12 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-gradient-to-bl from-lime-950/10 to-background min-h-screen text-foreground;
+    @apply lg:bg-radial-[at_50%_0%] bg-gradient-to-b from-lime-100/10 lg:from-lime-100/10 via-background/20 to-background bg-fixed h-screen text-foreground;
+  }
+
+  /* Add a content wrapper */
+  .content-wrapper {
+    @apply min-h-screen overflow-auto;
   }
 }
 

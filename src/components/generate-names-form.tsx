@@ -131,7 +131,7 @@ export default function GenerateNamesForm() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[calc(100vh-30rem)]">
         {/* Form Section */}
         <div>
-          <Card className="h-full">
+          <Card className="h-full backdrop-blur-md bg-background/30">
             <CardHeader className="pb-4">
               <CardTitle className="text-foreground">
                 <h2>Create Names</h2>
@@ -330,7 +330,7 @@ export default function GenerateNamesForm() {
 
         {/* Results Section */}
         <div>
-          <Card className="h-full">
+          <Card className="h-full backdrop-blur-md bg-background/30">
             <CardHeader>
               <CardTitle className="text-foreground">
                 <h2>Generated Names</h2>
