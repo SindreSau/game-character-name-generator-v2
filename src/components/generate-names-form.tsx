@@ -8,6 +8,7 @@ import { Copy, GripHorizontal, WandSparkles } from 'lucide-react';
 import { generateCharacterNames } from '@/actions/get-names.server';
 import { CharacterNameInput } from '@/types/name-generator';
 import { toast } from 'sonner';
+import { FadeInSection } from '@/components/general/fade-in-section';
 
 // shadcn/ui components
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -130,7 +131,7 @@ export default function GenerateNamesForm() {
     <div className="container mx-auto p-4">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[calc(100vh-30rem)]">
         {/* Form Section */}
-        <div>
+        <FadeInSection delay={100}>
           <Card className="h-full backdrop-blur-md bg-background/30">
             <CardHeader className="pb-4">
               <CardTitle className="text-foreground">
@@ -326,10 +327,10 @@ export default function GenerateNamesForm() {
               </Form>
             </CardContent>
           </Card>
-        </div>
+        </FadeInSection>
 
         {/* Results Section */}
-        <div>
+        <FadeInSection delay={150}>
           <Card className="h-full backdrop-blur-md bg-background/30">
             <CardHeader>
               <CardTitle className="text-foreground">
@@ -347,21 +348,24 @@ export default function GenerateNamesForm() {
                     result.names && result.names.length > 0 ? (
                       <div className="grid grid-cols-1 gap-4">
                         {result.names.map((name: string, index: number) => (
-                          <div
+                          <FadeInSection
+                            delay={200 + index * 50}
                             key={index}
-                            className="flex justify-between items-center bg-secondary p-3 rounded-lg border border-border hover:border-primary transition-all"
+                            observeScroll={false}
                           >
-                            <span className="text-lg">{name}</span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => copyToClipboard(name)}
-                              title="Copy to clipboard"
-                              className="cursor-pointer"
-                            >
-                              <Copy size={18} />
-                            </Button>
-                          </div>
+                            <div className="flex justify-between items-center bg-secondary p-3 rounded-lg border border-border hover:border-primary transition-all">
+                              <span className="text-lg">{name}</span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => copyToClipboard(name)}
+                                title="Copy to clipboard"
+                                className="cursor-pointer"
+                              >
+                                <Copy size={18} />
+                              </Button>
+                            </div>
+                          </FadeInSection>
                         ))}
                       </div>
                     ) : (
@@ -385,7 +389,7 @@ export default function GenerateNamesForm() {
               )}
             </CardContent>
           </Card>
-        </div>
+        </FadeInSection>
       </div>
     </div>
   );
