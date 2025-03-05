@@ -4,13 +4,12 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Copy, GripHorizontal, WandSparkles } from 'lucide-react';
+import { WandSparkles } from 'lucide-react';
 import { generateCharacterNames } from '@/actions/get-names.server';
 import { CharacterNameInput } from '@/types/name-generator';
 import { toast } from 'sonner';
 import { FadeInSection } from '@/components/general/fade-in-section';
 
-// shadcn/ui components
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
@@ -30,17 +29,9 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
-import Spinner from './general/spinner';
-
-// Define a type for the resolved value
-type ResolvedGenerateCharacterNamesReturnType = {
-  success: boolean;
-  message: string;
-  names: string[];
-  provider?: string;
-};
+import { CustomSlider } from '../general/custom-slider';
+import FormResults, { GeneratedNamesResult } from './form-results';
 
 // Define validation schema with Zod
 const formSchema = z.object({
@@ -56,19 +47,18 @@ type FormValues = z.infer<typeof formSchema>;
 // Predefined options for form selects
 const GENRE_OPTIONS = [
   'Fantasy',
-  'Sci-Fi',
-  'Horror',
-  'Action',
   'RPG',
+  'Sci-Fi',
+  'Action',
   'FPS',
   'MMO',
   'Fighting',
+  'Horror',
 ];
 
 export default function GenerateNamesForm() {
   // Use the resolved type for state
-  const [result, setResult] =
-    useState<ResolvedGenerateCharacterNamesReturnType | null>(null);
+  const [result, setResult] = useState<GeneratedNamesResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<FormValues>({
@@ -98,12 +88,10 @@ export default function GenerateNamesForm() {
 
       // Await the promise and cast its resolved value.
       const response = await generateCharacterNames(input);
-      setResult(
-        response as unknown as ResolvedGenerateCharacterNamesReturnType
-      );
+      setResult(response as unknown as GeneratedNamesResult);
     } catch (error) {
       console.error('Error generating names:', error);
-      const errorResult: ResolvedGenerateCharacterNamesReturnType = {
+      const errorResult: GeneratedNamesResult = {
         success: false,
         message: 'An unexpected error occurred',
         names: [],
@@ -118,18 +106,9 @@ export default function GenerateNamesForm() {
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      toast.success('Copied to clipboard', {
-        description: `"${text}" has been copied.`,
-        duration: 1500,
-      });
-    });
-  };
-
   return (
     <div className="container mx-auto p-4">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[calc(100vh-30rem)]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 ">
         {/* Form Section */}
         <FadeInSection delay={100}>
           <Card className="h-full backdrop-blur-md bg-background/30">
@@ -180,15 +159,15 @@ export default function GenerateNamesForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Styles</FormLabel>
+                        <FormDescription>
+                          Describe your character with a few keywords
+                        </FormDescription>
                         <FormControl>
                           <Input
-                            placeholder="Elegant, Mysterious, Epic (comma separated)"
+                            placeholder="Viking, Warrior, Nordic"
                             {...field}
                           />
                         </FormControl>
-                        <FormDescription>
-                          Enter styles separated by commas
-                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -257,25 +236,19 @@ export default function GenerateNamesForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel id="complexity-slider-label">
-                          Complexity: {field.value}
+                          Complexity : {field.value}
                         </FormLabel>
                         <FormControl>
-                          <div className="relative">
-                            <Slider
+                          <div className="relative py-2">
+                            <CustomSlider
                               min={1}
                               max={5}
-                              step={1}
+                              step={0.1}
                               defaultValue={[field.value]}
                               onValueChange={(vals) => field.onChange(vals[0])}
                               className="w-full"
                               aria-labelledby="complexity-slider-label"
                             />
-                            <div className="absolute -top-1 left-0 right-0 pointer-events-none flex justify-between opacity-0">
-                              <GripHorizontal
-                                size={16}
-                                className="text-primary opacity-70"
-                              />
-                            </div>
                           </div>
                         </FormControl>
                         <div className="flex justify-between text-xs text-muted-foreground">
@@ -330,66 +303,7 @@ export default function GenerateNamesForm() {
         </FadeInSection>
 
         {/* Results Section */}
-        <FadeInSection delay={150}>
-          <Card className="h-full backdrop-blur-md bg-background/30">
-            <CardHeader>
-              <CardTitle className="text-foreground">
-                <h2>Generated Names</h2>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="flex justify-center items-center size-full">
-                  <Spinner />
-                </div>
-              ) : result ? (
-                <div>
-                  {result.success ? (
-                    result.names && result.names.length > 0 ? (
-                      <div className="grid grid-cols-1 gap-4">
-                        {result.names.map((name: string, index: number) => (
-                          <FadeInSection
-                            delay={200 + index * 50}
-                            key={index}
-                            observeScroll={false}
-                          >
-                            <div className="flex justify-between items-center bg-secondary p-3 rounded-lg border border-border hover:border-primary transition-all">
-                              <span className="text-lg">{name}</span>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => copyToClipboard(name)}
-                                title="Copy to clipboard"
-                                className="cursor-pointer"
-                              >
-                                <Copy size={18} />
-                              </Button>
-                            </div>
-                          </FadeInSection>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-muted-foreground">
-                        No names were generated.
-                      </p>
-                    )
-                  ) : (
-                    <div className="text-destructive p-4 border border-destructive bg-destructive/10 rounded-lg">
-                      <p className="font-medium">Error</p>
-                      <p>{result.message}</p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-muted rounded-lg">
-                  <p className="text-muted-foreground">
-                    No names generated yet
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </FadeInSection>
+        <FormResults result={result} isLoading={isLoading} />
       </div>
     </div>
   );

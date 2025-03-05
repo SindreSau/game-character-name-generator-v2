@@ -32,7 +32,7 @@ export async function generateCharacterNames(
       ...input,
       complexity: input.complexity || 3,
       gender: input.gender || 'neutral',
-      count: input.count || 10,
+      count: input.count || 7,
       length: input.length || 'medium',
     };
 

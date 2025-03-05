@@ -15,6 +15,7 @@ import {
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
 
+// Updated NAV_ITEMS to put Favorites after Generators
 const NAV_ITEMS = [
   {
     title: 'Home',
@@ -24,6 +25,7 @@ const NAV_ITEMS = [
     title: 'About',
     href: '/about',
   },
+  // Favorites is now removed from here and added after the Generators in the rendering logic
 ];
 
 const GENERATOR_ITEMS = [
@@ -115,6 +117,15 @@ export default function Header() {
     );
   };
 
+  // For mobile menu, we need all items including Favorites
+  const mobileNavItems = [
+    ...NAV_ITEMS,
+    {
+      title: 'Favorites',
+      href: '/favorites',
+    },
+  ];
+
   return (
     <header className="border-b border-zinc-800 p-3 md:p-4 relative">
       <div className="flex justify-between items-center container lg:pr-16  2xl:pr-0">
@@ -129,12 +140,14 @@ export default function Header() {
         <div className="hidden lg:flex items-center">
           <NavigationMenu>
             <NavigationMenuList className="flex gap-2">
+              {/* Render Home and About from NAV_ITEMS */}
               {NAV_ITEMS.map((item) => (
                 <NavigationMenuItem key={item.href}>
                   <NavLink href={item.href}>{item.title}</NavLink>
                 </NavigationMenuItem>
               ))}
 
+              {/* Generators Dropdown */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="px-4 py-2 text-sm font-medium hover:text-primary transition-colors bg-transparent hover:bg-transparent data-[state=open]:bg-transparent focus:bg-transparent data-[state=open]:text-primary">
                   <span>Name Generators</span>
@@ -174,6 +187,11 @@ export default function Header() {
                     ))}
                   </ul>
                 </NavigationMenuContent>
+              </NavigationMenuItem>
+
+              {/* Add Favorites as the last item */}
+              <NavigationMenuItem>
+                <NavLink href="/favorites">Favorites</NavLink>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
@@ -222,7 +240,8 @@ export default function Header() {
         <div className="p-6 h-full flex flex-col">
           <nav className="flex-1 mt-8">
             <ul className="space-y-6">
-              {NAV_ITEMS.map((item, index) => (
+              {/* We use mobileNavItems for the mobile menu */}
+              {mobileNavItems.map((item, index) => (
                 <li
                   key={item.href}
                   className={`transform transition-all duration-500 ease-out ${
@@ -255,7 +274,7 @@ export default function Header() {
                 }`}
                 style={{
                   transitionDelay: isMenuOpen
-                    ? `${NAV_ITEMS.length * 150}ms`
+                    ? `${mobileNavItems.length * 150}ms`
                     : '0ms',
                 }}
               >
