@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Copy, GripHorizontal, WandSparkles } from 'lucide-react';
+import { Copy, WandSparkles } from 'lucide-react';
 import { generateCharacterNames } from '@/actions/get-names.server';
 import { CharacterNameInput } from '@/types/name-generator';
 import { toast } from 'sonner';
@@ -30,9 +30,9 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import Spinner from './general/spinner';
+import { CustomSlider } from './general/custom-slider';
 
 // Define a type for the resolved value
 type ResolvedGenerateCharacterNamesReturnType = {
@@ -260,22 +260,16 @@ export default function GenerateNamesForm() {
                           Complexity: {field.value}
                         </FormLabel>
                         <FormControl>
-                          <div className="relative">
-                            <Slider
+                          <div className="relative py-2">
+                            <CustomSlider
                               min={1}
                               max={5}
-                              step={1}
+                              step={0.1}
                               defaultValue={[field.value]}
                               onValueChange={(vals) => field.onChange(vals[0])}
                               className="w-full"
                               aria-labelledby="complexity-slider-label"
                             />
-                            <div className="absolute -top-1 left-0 right-0 pointer-events-none flex justify-between opacity-0">
-                              <GripHorizontal
-                                size={16}
-                                className="text-primary opacity-70"
-                              />
-                            </div>
                           </div>
                         </FormControl>
                         <div className="flex justify-between text-xs text-muted-foreground">
