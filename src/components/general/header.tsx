@@ -181,7 +181,7 @@ export default function Header() {
 
         {/* Hamburger Menu Button - Always visible in mobile view */}
         <button
-          className="lg:hidden flex flex-col justify-center items-center w-6 h-6 relative focus:outline-none z-50"
+          className="lg:hidden flex flex-col justify-center items-center rounded w-6 h-6 relative z-50"
           onClick={toggleMenu}
           aria-label="Toggle navigation menu"
           aria-expanded={isMenuOpen}
@@ -216,9 +216,8 @@ export default function Header() {
       {/* Mobile Navigation Menu */}
       <div
         className={`fixed top-0 right-0 bottom-0 shadow-[-10px_0px_15px_rgba(0,0,0,0.3)] w-9/12 bg-white dark:bg-zinc-900 z-40 transform transition-transform duration-300 ease-in-out lg:hidden ${
-          isMenuOpen ? 'translate-x-0' : 'translate-x-full'
+          isMenuOpen ? 'translate-x-0 visible' : 'translate-x-full hidden'
         }`}
-        aria-hidden={!isMenuOpen}
       >
         <div className="p-6 h-full flex flex-col">
           <nav className="flex-1 mt-8">
