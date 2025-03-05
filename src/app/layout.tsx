@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { SiGithub } from '@icons-pack/react-simple-icons';
 import Header from '@/components/general/header';
 import Script from 'next/script';
+import { Analytics } from '@vercel/analytics/react';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -41,7 +42,7 @@ export default function RootLayout({
       <Script
         defer
         src="https://umami.sindresau.me/script.js"
-        data-website-id="383c237c-849f-4de8-bf1c-77fa0a9f0116"
+        data-website-id="7e42dc15-28d5-4ea8-a77c-c54f36e7a21d"
         data-domains="gamenamegen.site"
       ></Script>
       <body
@@ -72,6 +73,7 @@ export default function RootLayout({
           </div>
           <Toaster />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
