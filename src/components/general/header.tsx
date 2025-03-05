@@ -215,8 +215,8 @@ export default function Header() {
 
       {/* Mobile Navigation Menu */}
       <div
-        className={`fixed top-0 right-0 bottom-0 shadow-[-10px_0px_15px_rgba(0,0,0,0.3)] w-9/12 bg-white dark:bg-zinc-900 z-40 transform transition-transform duration-300 ease-in-out lg:hidden ${
-          isMenuOpen ? 'translate-x-0 visible' : 'translate-x-full hidden'
+        className={`fixed top-0 right-0 bottom-0 shadow-[-10px_0px_15px_rgba(0,0,0,0.3)] w-9/12 bg-background z-40 transform transition-transform duration-300 ease-in-out lg:hidden ${
+          isMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <div className="p-6 h-full flex flex-col">

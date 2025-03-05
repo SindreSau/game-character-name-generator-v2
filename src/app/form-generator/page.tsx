@@ -9,25 +9,25 @@ import {
 import Script from 'next/script';
 
 export const metadata: Metadata = {
-  title: 'Game Character Name Generator',
+  title: 'Game Character Name Generator Form',
   description:
     'Generate unique and creative names for your game characters with our AI-powered tool. Choose from fantasy, sci-fi, horror, and more game genres.',
   keywords:
-    'game character names, character name generator, RPG names, fantasy names, sci-fi character names, game names, unique character names',
+    'name generator, character name generator, game character names, fantasy names, game preset names, RPG names, gamertag, gamertag generator, gamertag AI tool, username, username generator, username AI tool, fantasy name generator, novel character names, DnD names, gaming nickname, online persona, unique identifiers, twitch username, discord name, steam name, xbox gamertag, playstation name, MMO character name, MOBA username, battle royale name, sci-fi name generator, villain names, hero names, streamer name ideas, clan name generator, unique name generator, character creator tool, name generator form, name generator AI',
   alternates: {
-    canonical: 'https://gamenamegen.site/character-generator',
+    canonical: 'https://gamenamegen.site/form-generator',
   },
   openGraph: {
-    title: 'Game Character Name Generator | Create Unique RPG Names',
+    title: 'Game Character Name Generator | AI Form Tool',
     description:
       'Generate unique and creative names for your game characters with our AI-powered tool. Choose from fantasy, sci-fi, horror, and more game genres.',
-    url: 'https://gamenamegen.site/character-generator',
+    url: 'https://gamenamegen.site/form-generator',
     siteName: 'Game Name Generator',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Game Character Name Generator',
+    title: 'Game Character Name Generator | AI Form Tool',
     description:
       'Generate unique and creative names for your game characters with our AI-powered tool.',
   },
