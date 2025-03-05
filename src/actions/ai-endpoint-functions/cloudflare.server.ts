@@ -33,24 +33,22 @@ async function callCloudflareAI(
     process.env.CLOUDFLARE_ACCOUNT_ID || 'e7692f5aa2217d2df0ebcfeb66d4fb08';
 
   const temperatureFromComplexity = (complexity: number): number => {
-    switch (complexity) {
-      case 1:
-        return 0.1;
-      case 2:
-        return 0.3;
-      case 3:
-        return 0.6;
-      case 4:
-        return 0.75;
-      case 5:
-        return 0.85;
-      default:
-        return 0.5;
-    }
-  };
+    const k = 1.14; // Steepness of the curve (higher = steeper)
+    const x0 = 3; // Midpoint of the input range (1-5)
 
-  console.log('Calling Cloudflare AI with:');
-  console.log('Input:', input);
+    const sigmoidValue = 1 / (1 + Math.exp(-k * (complexity - x0)));
+
+    const mappedValue = 0.3 + sigmoidValue * 0.7;
+
+    return Math.round(mappedValue * 100) / 100;
+  };
+  // console.log(
+  //   'Calling Cloudflare AI with temperature:',
+  //   temperatureFromComplexity(complexity)
+  // );
+
+  // console.log('Calling Cloudflare AI with:');
+  // console.log('Input:', input);
 
   const response = await fetch(
     `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}`,
@@ -63,6 +61,10 @@ async function callCloudflareAI(
       body: JSON.stringify({
         ...input,
         temperature: temperatureFromComplexity(complexity),
+        raw: true,
+        // stream: true,
+        top_p: 0.99,
+        top_k: 50,
       }),
     }
   );

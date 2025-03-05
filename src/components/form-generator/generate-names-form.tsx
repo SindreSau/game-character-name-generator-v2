@@ -159,15 +159,15 @@ export default function GenerateNamesForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Styles</FormLabel>
+                        <FormDescription>
+                          Describe your character with a few keywords
+                        </FormDescription>
                         <FormControl>
                           <Input
-                            placeholder="Elegant, Mysterious, Epic (comma separated)"
+                            placeholder="Viking, Warrior, Nordic"
                             {...field}
                           />
                         </FormControl>
-                        <FormDescription>
-                          Enter styles separated by commas
-                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
