@@ -133,7 +133,9 @@ export default function GenerateNamesForm() {
         <div>
           <Card className="h-full">
             <CardHeader className="pb-4">
-              <CardTitle className="text-foreground">Create Names</CardTitle>
+              <CardTitle className="text-foreground">
+                <h2>Create Names</h2>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <Form {...form}>
@@ -203,6 +205,7 @@ export default function GenerateNamesForm() {
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                             className="w-full"
+                            aria-label="Gender options"
                           >
                             <TabsList className="grid grid-cols-3 w-full">
                               <TabsTrigger value="neutral">Neutral</TabsTrigger>
@@ -232,6 +235,7 @@ export default function GenerateNamesForm() {
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                             className="w-full"
+                            aria-label="Name length options"
                           >
                             <TabsList className="grid grid-cols-3 w-full">
                               <TabsTrigger value="short">Short</TabsTrigger>
@@ -251,7 +255,9 @@ export default function GenerateNamesForm() {
                     name="complexity"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Complexity: {field.value}</FormLabel>
+                        <FormLabel id="complexity-slider-label">
+                          Complexity: {field.value}
+                        </FormLabel>
                         <FormControl>
                           <div className="relative">
                             <Slider
@@ -261,6 +267,7 @@ export default function GenerateNamesForm() {
                               defaultValue={[field.value]}
                               onValueChange={(vals) => field.onChange(vals[0])}
                               className="w-full"
+                              aria-labelledby="complexity-slider-label"
                             />
                             <div className="absolute -top-1 left-0 right-0 pointer-events-none flex justify-between opacity-0">
                               <GripHorizontal
@@ -325,7 +332,9 @@ export default function GenerateNamesForm() {
         <div>
           <Card className="h-full">
             <CardHeader>
-              <CardTitle className="text-foreground">Generated Names</CardTitle>
+              <CardTitle className="text-foreground">
+                <h2>Generated Names</h2>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {isLoading ? (
