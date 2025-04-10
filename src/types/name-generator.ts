@@ -38,3 +38,47 @@ export type ActionResult =
       message?: string;
     }
   | { status: 'success'; data: ResolvedNameResult };
+
+// Path of Exile 2 specific types
+export type PoE2Class =
+  | 'Warrior'
+  | 'Sorceress'
+  | 'Druid'
+  | 'Rogue'
+  | 'Monk'
+  | 'Huntress'
+  | 'Necromancer'
+  | 'Mercenary'
+  | 'Witch'
+  | 'Ranger';
+
+export type PoE2ElementalTag =
+  | 'Fire'
+  | 'Ice'
+  | 'Lightning'
+  | 'Chaos'
+  | 'Physical'
+  | 'Poison';
+
+export type PoE2CharacterInput = {
+  count?: number;
+  class: PoE2Class;
+  elementalTags: PoE2ElementalTag[];
+  additionalStyles?: string; // Free text input for more descriptions
+};
+
+// PoE2 form types
+export type PoE2FormInputs = {
+  class: PoE2Class;
+  elementalTags: PoE2ElementalTag[];
+  additionalStyles: string;
+};
+
+// Action result type for PoE2
+export type PoE2ActionResult =
+  | {
+      status: 'error';
+      errors: { [K in keyof PoE2FormInputs]?: string[] };
+      message?: string;
+    }
+  | { status: 'success'; data: ResolvedNameResult };

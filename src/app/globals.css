@@ -111,6 +111,10 @@
   .content-wrapper {
     @apply min-h-screen overflow-auto;
   }
+
+  h1 {
+    @apply font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary/80 to-teal-500/50;
+  }
 }
 
 @utility container {
