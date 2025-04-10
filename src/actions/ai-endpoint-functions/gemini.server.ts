@@ -65,19 +65,38 @@ async function callGeminiAI(prompt: string, count?: number) {
   return result;
 }
 
+// Add to the CharacterNameInput type interface or add locally:
+interface ExtendedCharacterNameInput extends CharacterNameInput {
+  systemPromptOverride?: string;
+  userPromptOverride?: string;
+}
+
 /**
  * Generate character names using Gemini API
  */
 export async function generateCharacterNamesWithGemini(
-  input: CharacterNameInput
+  input: ExtendedCharacterNameInput
 ): GenerateCharacterNamesReturnType {
   try {
-    const { genre, styles, complexity, gender, count, length } = input;
+    const {
+      genre,
+      styles,
+      complexity,
+      gender,
+      count,
+      length,
+      systemPromptOverride,
+      userPromptOverride,
+    } = input;
 
     const nameExampleWithCount = JSON.stringify({
       names: Array.from({ length: count! }, (_, i) => `Name${i + 1}`),
     });
-    const systemPrompt = `You are an expert at generating creative names for game characters with specific themes and styles.
+
+    // Use override system prompt if provided, otherwise use default
+    const systemPrompt =
+      systemPromptOverride ||
+      `You are an expert at generating creative names for game characters with specific themes and styles.
 
 ### RESPONSE FORMAT REQUIREMENTS:
 - **You MUST respond with VALID JSON**
@@ -120,8 +139,8 @@ _(Describes name complexity, similar to temperature for LLMs.)_
 ${nameExampleWithCount}
 `;
 
-    // Use a structured user prompt, like in the Cloudflare version
-    const userPrompt = `${JSON.stringify(input)}`;
+    // Use override user prompt if provided, otherwise use default
+    const userPrompt = userPromptOverride || `${JSON.stringify(input)}`;
 
     // Combine prompts for the Gemini API call
     const fullPrompt = `${systemPrompt}\n\n${userPrompt}`;

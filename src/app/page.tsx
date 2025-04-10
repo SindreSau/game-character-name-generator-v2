@@ -44,7 +44,7 @@ export default function Home() {
       {/* Hero Section */}
       <FadeInSection delay={50}>
         <section className="text-center mb-16">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary/80 to-teal-500/50">
+          <h1 className="text-4xl md:text-6xl font-bold">
             Ready to generate unique names for your next character?
           </h1>
           <p className="text-xl md:text-2xl max-w-3xl mx-auto text-muted-foreground mb-8">
@@ -228,10 +228,6 @@ export default function Home() {
             {/* Preset Generator Card */}
             <FadeInSection delay={400}>
               <Card className="relative overflow-hidden border-primary/20 opacity-90 transition-all hover:border-primary hover:shadow-md">
-                <div className="absolute top-3 right-3 bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded">
-                  Coming Soon
-                </div>
-
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Bookmark size={22} />
@@ -302,8 +298,10 @@ export default function Home() {
                 </CardContent>
 
                 <CardFooter>
-                  <Button disabled variant="outline" className="w-full gap-2">
-                    Coming Soon <ArrowRight size={16} />
+                  <Button asChild className="w-full gap-2">
+                    <Link href="/presets">
+                      Browse presets <ArrowRight size={16} />
+                    </Link>
                   </Button>
                 </CardFooter>
               </Card>

@@ -37,9 +37,9 @@ const GENERATOR_ITEMS = [
   },
   {
     title: 'Preset Name Generator',
-    href: '#',
+    href: '/presets',
     description: 'Coming soon - Generate names based on popular game presets.',
-    disabled: true,
+    disabled: false,
   },
 ];
 

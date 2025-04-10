@@ -77,15 +77,30 @@ async function callCloudflareAI(
   return result;
 }
 
+// Add to the CharacterNameInput type interface or add locally:
+interface ExtendedCharacterNameInput extends CharacterNameInput {
+  systemPromptOverride?: string;
+  userPromptOverride?: string;
+}
+
 /**
  * Generate character names using Cloudflare AI
  */
 export async function generateCharacterNamesWithCloudflare(
-  input: CharacterNameInput,
+  input: ExtendedCharacterNameInput,
   forceFail = false
 ): GenerateCharacterNamesReturnType {
   try {
-    const { genre, styles, complexity, gender, count, length } = input;
+    const {
+      genre,
+      styles,
+      complexity,
+      gender,
+      count,
+      length,
+      systemPromptOverride,
+      userPromptOverride,
+    } = input;
 
     // Check if the request should be forced to fail
     if (forceFail) {
@@ -101,7 +116,10 @@ export async function generateCharacterNamesWithCloudflare(
       names: Array.from({ length: count! }, (_, i) => `Name${i + 1}`),
     });
 
-    const systemPrompt = `You are an expert at generating creative names for game characters with specific themes and styles.
+    // Use override system prompt if provided, otherwise use default
+    const systemPrompt =
+      systemPromptOverride ||
+      `You are an expert at generating creative names for game characters with specific themes and styles.
 
 ### RESPONSE FORMAT REQUIREMENTS:
 - **You MUST respond with VALID JSON**
@@ -146,7 +164,7 @@ ${nameExampleWithCount}
 
     // Remove forceFail: true and count: x from the input
     delete input.count;
-    const userPrompt = `${JSON.stringify(input)}`;
+    const userPrompt = userPromptOverride || `${JSON.stringify(input)}`;
     // console.log('Generating response with Cloudflare AI:', systemPrompt);
     // console.log('userPrompt: ', userPrompt);
 
