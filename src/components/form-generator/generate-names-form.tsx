@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, type Resolver } from 'react-hook-form';
 import { z } from 'zod';
 import { WandSparkles, RefreshCw, RotateCcw } from 'lucide-react';
-import { generateCharacterNames } from '@/actions/get-names.server';
+import { getNames } from '@/actions/get-names.server';
 import { CharacterNameInput } from '@/types/name-generator';
 import { toast } from 'sonner';
 import { FadeInSection } from '@/components/general/fade-in-section';
@@ -270,7 +270,7 @@ export default function GenerateNamesForm() {
       };
 
       // Await the promise and cast its resolved value.
-      const response = await generateCharacterNames(input);
+      const response = await getNames(input);
       const typedResponse = response as unknown as GeneratedNamesResult;
 
       // Update both states

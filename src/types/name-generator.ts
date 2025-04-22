@@ -9,6 +9,10 @@ export type CharacterNameInput = {
   gender?: 'neutral' | 'masculine' | 'feminine'; // Gender association for the name
   complexity?: number; // How complex the name should be (1-10)
   length?: 'short' | 'medium' | 'long'; // Length of the name
+  modelId?: string; // Added
+  race?: string; // Added
+  class?: string; // Added
+  customInstructions?: string; // Added
 };
 
 export type GenerateCharacterNamesReturnType = Promise<{

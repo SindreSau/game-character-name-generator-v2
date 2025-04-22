@@ -1,165 +1,54 @@
 'use server';
-import { generateCharacterNamesWithCloudflare } from './ai-endpoint-functions/cloudflare.server';
-import { generateCharacterNamesWithGemini } from './ai-endpoint-functions/gemini.server';
-import {
-  CharacterNameInput,
-  GenerateCharacterNamesReturnType,
-} from '@/types/name-generator';
+
+import { AIService } from '@/services/ai/ai-service';
+import { buildCharacterNamePrompts } from '@/services/prompt-builders/character-name-builder';
+import { CharacterNameInput } from '@/types/name-generator';
+import { AIProviderResponse } from '@/services/ai/types';
+
+// Re-export the type for the client
+export type { CharacterNameInput };
 
 /**
- * Main action function to generate character names
- * This handles validation and orchestrates the name generation process
+ * Server Action to generate character names using the AI service.
+ *
+ * @param input - The character name generation parameters from the form.
+ * @returns An AIProviderResponse containing the success status, message, and generated names.
  */
-export async function generateCharacterNames(
-  input: CharacterNameInput,
-  failCloudflare = false
-): GenerateCharacterNamesReturnType {
-  // No need to repeat 'use server' directive here since it's already at the top
+export async function getNames(
+  input: CharacterNameInput
+): Promise<AIProviderResponse> {
+  console.log('getNames Server Action called with input:', input);
 
   try {
-    // Validate input
-    const validationResult = validateInput(input);
-    if (!validationResult.isValid) {
-      return {
-        success: false,
-        message: validationResult.message,
-        names: [],
-      };
-    }
+    // 1. Build the prompts using the dedicated builder
+    const { systemPrompt, userPrompt } = await buildCharacterNamePrompts(input);
 
-    // Set defaults for optional fields
-    const processedInput = {
-      ...input,
-      complexity: input.complexity || 3,
-      gender: input.gender || 'neutral',
-      count: input.count || 7,
-      length: input.length || 'medium',
-    };
+    // 2. Instantiate the generic AI service
+    const aiService = new AIService();
 
-    // Primary generation method (Cloudflare)
-    try {
-      const result = await generateCharacterNamesWithCloudflare(
-        processedInput,
-        failCloudflare
-      );
-      if (result.success) {
-        return {
-          ...result,
-          provider: 'cloudflare',
-        };
-      }
+    // 3. Call the generic generate method with prompts and config
+    const result = await aiService.generate(systemPrompt, userPrompt, {
+      modelId: input.modelId, // Pass model preference from input
+      complexity: input.complexity,
+      count: input.count,
+      // providerOrder: input.providerOrder // Pass if you add providerOrder to CharacterNameInput
+    });
 
-      // If primary method fails, try the Gemini fallback
-      console.log(
-        'Primary name generation with Cloudflare failed, trying Gemini fallback...'
-      );
-      const fallbackResult = await generateCharacterNamesWithGemini(
-        processedInput
-      );
-
-      return {
-        ...fallbackResult,
-        provider: 'gemini',
-        message: fallbackResult.success
-          ? `${fallbackResult.message} (Cloudflare failed, used Gemini as fallback)`
-          : fallbackResult.message,
-      };
-    } catch (error) {
-      console.error('Error in primary name generation with Cloudflare:', error);
-
-      // Try Gemini as fallback
-      try {
-        console.log('Trying Gemini as fallback due to Cloudflare error...');
-        const fallbackResult = await generateCharacterNamesWithGemini(
-          processedInput
-        );
-
-        return {
-          ...fallbackResult,
-          provider: 'gemini',
-          message: fallbackResult.success
-            ? `${fallbackResult.message} (Cloudflare error, used Gemini as fallback)`
-            : fallbackResult.message,
-        };
-      } catch (fallbackError) {
-        console.error(
-          'Error in fallback name generation with Gemini:',
-          fallbackError
-        );
-        return {
-          success: false,
-          message: 'Both Cloudflare and Gemini name generation methods failed',
-          names: [],
-        };
-      }
-    }
+    console.log('AI Service Result:', result);
+    return result;
   } catch (error) {
-    console.error('Error in generateCharacterNames action:', error);
+    console.error('Error in getNames Server Action:', error);
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : 'An unknown error occurred during name generation.';
+    // Ensure a consistent error response structure
     return {
       success: false,
-      message: `Error: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`,
+      message: `Server Action Error: ${errorMessage}`,
       names: [],
+      // Optionally include provider info if available/relevant in error cases
+      providerInfo: { provider: 'N/A', model: input.modelId || 'default' },
     };
   }
-}
-
-/**
- * Validates the input parameters for character name generation
- */
-function validateInput(input: CharacterNameInput): {
-  isValid: boolean;
-  message: string;
-} {
-  // Check required fields
-  if (!input.genre) {
-    return {
-      isValid: false,
-      message: 'Invalid input: genre is required',
-    };
-  }
-
-  // Check that styles is an array with at least one element
-  if (!Array.isArray(input.styles)) {
-    return {
-      isValid: false,
-      message: 'Invalid input: styles array must contain at least one style',
-    };
-  }
-
-  // Validate complexity if provided
-  if (input.complexity !== undefined) {
-    const complexityNum = Number(input.complexity);
-    if (isNaN(complexityNum) || complexityNum < 1 || complexityNum > 5) {
-      return {
-        isValid: false,
-        message: 'Complexity must be between 1 and 10',
-      };
-    }
-  }
-
-  // Validate count if provided
-  if (input.count !== undefined) {
-    const countNum = Number(input.count);
-    if (isNaN(countNum) || countNum < 1 || countNum > 100) {
-      return {
-        isValid: false,
-        message: 'Count must be between 1 and 100',
-      };
-    }
-  }
-
-  // Validate gender if provided
-  if (
-    input.gender !== undefined &&
-    !['neutral', 'masculine', 'feminine'].includes(input.gender)
-  ) {
-    return {
-      isValid: false,
-      message: "Gender must be 'neutral', 'masculine', or 'feminine'",
-    };
-  }
-
-  return { isValid: true, message: 'Input is valid' };
 }
